@@ -18,6 +18,7 @@ app.use('/api/v1/jobs', jobsRouter)
 
 // ====== start server ======
 app.use(notFoundMiddleware)
+app.use(errorHandlerMiddleware)
 const port = process.env.PORT || 2990
 const start = async () => {
   try {
