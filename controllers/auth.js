@@ -1,7 +1,7 @@
 // const mongoose = require('mongoose')
 const User = require('../models/User')
 const { StatusCodes } = require('http-status-codes')
-const { BadRequestError } = require('../errors')
+const { BadRequestError, UnauthenticatedError } = require('../errors')
 // const jwt = require('jsonwebtoken')
 
 // Register:
@@ -21,7 +21,22 @@ const register = async (req, res) => {
 }
 
 const login = async (req, res) => {
-  res.send('login existent user')
+  const { email, password } = req.body
+  if (!email || !password) {
+    throw new BadRequestError('Por favor informe email e senha')
+  }
+  const user = await User.findOne({ email })
+  if (!user) {
+    throw new UnauthenticatedError('Usuário não encontrado')
+  }
+  // compare password
+  const isPasswordCorrect = await user.comparePassword(password)
+
+  if (!isPasswordCorrect) {
+    throw new UnauthenticatedError('Senha inválida.')
+  }
+  const token = user.createJWT()
+  res.json({ name: user.name, msg: 'login successful', token })
 }
 
 module.exports = { register, login }
