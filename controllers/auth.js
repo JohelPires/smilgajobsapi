@@ -2,6 +2,7 @@
 const User = require('../models/User')
 const { StatusCodes } = require('http-status-codes')
 const { BadRequestError } = require('../errors')
+const jwt = require('jsonwebtoken')
 
 // Register:
 // - validate name, email, password - with mongoose
@@ -10,12 +11,11 @@ const { BadRequestError } = require('../errors')
 // - Send response with token
 
 const register = async (req, res) => {
-  const { name, email, password } = req.body
-  //   if (!name || !email || !password) {
-  //     throw new BadRequestError('Informe nome, email e senha válidos.')
-  //   }
   const user = await User.create({ ...req.body })
-  res.status(StatusCodes.CREATED).json({ user })
+  const token = jwt.sign({ userId: user._id, name: user.name }, 'jwtSecret', {
+    expiresIn: '30d',
+  })
+  res.status(StatusCodes.CREATED).json({ user: { name: user.name }, token })
 }
 
 const login = async (req, res) => {
