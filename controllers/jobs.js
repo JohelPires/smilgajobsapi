@@ -34,7 +34,7 @@ const updateJob = async (req, res) => {
   const job = await Job.findOneAndUpdate(
     { _id: jobId, createdBy: user },
     req.body,
-    { returnDocument: true }
+    { new: true, runValidators: true }
   )
   if (!job) {
     throw new NotFoundError(`Job ${jobId} not found`)
