@@ -31,12 +31,25 @@ const createJob = async (req, res) => {
 const updateJob = async (req, res) => {
   const user = req.user.userId
   const jobId = req.params.id
-  const job = Job.findByIdAndUpdate()
-  res.send(`update job ${req.params.id}`)
+  const job = await Job.findOneAndUpdate(
+    { _id: jobId, createdBy: user },
+    req.body,
+    { returnDocument: true }
+  )
+  if (!job) {
+    throw new NotFoundError(`Job ${jobId} not found`)
+  }
+  res.status(StatusCodes.OK).json(job)
 }
 
 const deleteJob = async (req, res) => {
-  res.send(`delete job ${req.params.id}`)
+  const user = req.user.userId
+  const jobId = req.params.id
+  const job = await Job.findOneAndDelete({ _id: jobId, createdBy: user })
+  if (!job) {
+    throw new NotFoundError(`Job ${jobId} not found`)
+  }
+  res.status(StatusCodes.OK).json({ msg: `Job deleted.`, job })
 }
 
 module.exports = { getAllJobs, getJob, createJob, updateJob, deleteJob }
